@@ -16,6 +16,7 @@ import de.fhpotsdam.unfolding.providers.MBTilesMapProvider;
 import de.fhpotsdam.unfolding.utils.MapUtils;
 import parsing.ParseFeed;
 import processing.core.PApplet;
+import processing.core.PGraphics;
 
 /** EarthquakeCityMap
  * An application with an interactive map displaying earthquake data.
@@ -35,7 +36,7 @@ public class EarthquakeCityMap extends PApplet {
 	private static final long serialVersionUID = 1L;
 
 	// IF YOU ARE WORKING OFFILINE, change the value of this variable to true
-	private static final boolean offline = false;
+	private static final boolean offline = true;
 	
 	/** This is where to find the local tiles, for working without an Internet connection */
 	public static String mbTilesString = "blankLight-1-3.mbtiles";
@@ -62,9 +63,13 @@ public class EarthquakeCityMap extends PApplet {
 	private CommonMarker lastSelected;
 	private CommonMarker lastClicked;
 	
+	// to overdraw titles over all
+	static PGraphics titlesGraphics;
+	
 	public void setup() {		
 		// (1) Initializing canvas and map tiles
 		size(900, 700, OPENGL);
+		
 		if (offline) {
 		    map = new UnfoldingMap(this, 200, 50, 650, 600, new MBTilesMapProvider(mbTilesString));
 		    earthquakesURL = "2.5_week.atom";  // The same feed, but saved August 7, 2015
@@ -117,10 +122,11 @@ public class EarthquakeCityMap extends PApplet {
 	
 	
 	public void draw() {
+		titlesGraphics = createGraphics(650, 600);
 		background(0);
 		map.draw();
 		addKey();
-		
+		image(titlesGraphics, 200, 50);
 	}
 	
 	/** Event handler that gets called automatically when the 
@@ -145,7 +151,16 @@ public class EarthquakeCityMap extends PApplet {
 	// 
 	private void selectMarkerIfHover(List<Marker> markers)
 	{
-		// TODO: Implement this method
+		// Check all markers for being selected and remember first one found 
+		if (lastSelected == null) {
+			for (Marker marker : markers) {
+				if (marker.isInside(map, mouseX, mouseY)) {
+					lastSelected = (CommonMarker) marker;		//cast may cause a fault
+					lastSelected.setSelected(true);
+					return;
+				}
+			}
+		}
 	}
 	
 	/** The event handler for mouse clicks
@@ -159,8 +174,62 @@ public class EarthquakeCityMap extends PApplet {
 		// TODO: Implement this method
 		// Hint: You probably want a helper method or two to keep this code
 		// from getting too long/disorganized
+		if (lastClicked != null) {
+			lastClicked = null;
+			unhideMarkers();
+		} else {
+			for (Marker marker : quakeMarkers) {
+				if (marker.isInside(map, mouseX, mouseY)) {
+					hideMarkers();
+					lastClicked = (CommonMarker) marker;
+					marker.setHidden(false);
+					showThreatenCities(marker);
+					break;
+				}
+			}
+			
+			for (Marker marker : cityMarkers) {
+				if (marker.isInside(map, mouseX, mouseY)) {
+					hideMarkers();
+					lastClicked = (CommonMarker) marker;
+					marker.setHidden(false);
+					showThreatQuakes(marker);
+					break;
+				}
+			}
+		}
 	}
 	
+	private void showThreatenCities(Marker quake) {
+		for (Marker city : cityMarkers) {
+			if (isThreaten(quake, city)) {
+				city.setHidden(false);
+			}
+		}
+	}
+	
+	private void showThreatQuakes(Marker city) {
+		for (Marker quake : quakeMarkers) {
+			if (isThreaten(quake, city)) {
+				quake.setHidden(false);
+			}
+		}
+	}
+	
+	private boolean isThreaten(Marker quake, Marker city) {
+		return quake.getDistanceTo(city.getLocation()) <= ((EarthquakeMarker) quake).threatCircle();
+	}
+	
+	// loop over and hide all markers
+	private void hideMarkers() {
+		for(Marker marker : quakeMarkers) {
+			marker.setHidden(true);
+		}
+			
+		for(Marker marker : cityMarkers) {
+			marker.setHidden(true);
+		}
+	}
 	
 	// loop over and unhide all markers
 	private void unhideMarkers() {
