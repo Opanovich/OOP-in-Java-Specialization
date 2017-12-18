@@ -260,6 +260,7 @@ public class EarthquakeCityMap extends PApplet {
 	// helper method to draw key in GUI
 	private void addKey() {	
 		// Remember you can use Processing's graphics methods here
+		pushStyle();
 		fill(255, 250, 240);
 		
 		int xbase = 25;
@@ -317,7 +318,7 @@ public class EarthquakeCityMap extends PApplet {
 		strokeWeight(2);
 		line(centerx-8, centery-8, centerx+8, centery+8);
 		line(centerx-8, centery+8, centerx+8, centery-8);
-			
+		popStyle();
 	}
 
 	
