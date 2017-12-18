@@ -8,6 +8,7 @@ import de.fhpotsdam.unfolding.data.Feature;
 import de.fhpotsdam.unfolding.data.GeoJSONReader;
 import de.fhpotsdam.unfolding.data.PointFeature;
 import de.fhpotsdam.unfolding.geo.Location;
+import de.fhpotsdam.unfolding.marker.AbstractMarker;
 import de.fhpotsdam.unfolding.marker.AbstractShapeMarker;
 import de.fhpotsdam.unfolding.marker.Marker;
 import de.fhpotsdam.unfolding.marker.MultiMarker;
@@ -108,6 +109,9 @@ public class EarthquakeCityMap extends PApplet {
 		    quakeMarkers.add(new OceanQuakeMarker(feature));
 		  }
 	    }
+	    
+	    // set map to OceanQuakeMarker
+	    OceanQuakeMarker.setMap(map);
 
 	    // could be used for debugging
 	    printQuakes();
@@ -175,6 +179,9 @@ public class EarthquakeCityMap extends PApplet {
 		// Hint: You probably want a helper method or two to keep this code
 		// from getting too long/disorganized
 		if (lastClicked != null) {
+			if (lastClicked instanceof OceanQuakeMarker) {
+				((OceanQuakeMarker) lastClicked).setClicked(false);
+			}
 			lastClicked = null;
 			unhideMarkers();
 		} else {
@@ -184,9 +191,13 @@ public class EarthquakeCityMap extends PApplet {
 					lastClicked = (CommonMarker) marker;
 					marker.setHidden(false);
 					showThreatenCities(marker);
+					if (marker instanceof OceanQuakeMarker) {
+						((OceanQuakeMarker) marker).setClicked(true);
+					}
 					break;
 				}
 			}
+			
 			
 			for (Marker marker : cityMarkers) {
 				if (marker.isInside(map, mouseX, mouseY)) {
@@ -201,9 +212,13 @@ public class EarthquakeCityMap extends PApplet {
 	}
 	
 	private void showThreatenCities(Marker quake) {
+		
 		for (Marker city : cityMarkers) {
 			if (isThreaten(quake, city)) {
 				city.setHidden(false);
+				if (quake instanceof OceanQuakeMarker) {
+					((OceanQuakeMarker) quake).addThreat((AbstractMarker) city);
+				}
 			}
 		}
 	}
