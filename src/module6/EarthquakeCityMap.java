@@ -36,7 +36,7 @@ public class EarthquakeCityMap extends PApplet {
 	private static final long serialVersionUID = 1L;
 
 	// IF YOU ARE WORKING OFFILINE, change the value of this variable to true
-	private static final boolean offline = false;
+	private static final boolean offline = true;
 	
 	/** This is where to find the local tiles, for working without an Internet connection */
 	public static String mbTilesString = "blankLight-1-3.mbtiles";
@@ -117,6 +117,7 @@ public class EarthquakeCityMap extends PApplet {
 
 	    // could be used for debugging
 	    printQuakes();
+	    sortAndPrint(10);
 	 		
 	    // (3) Add markers to map
 	    //     NOTE: Country markers are not added to the map.  They are used
@@ -136,9 +137,18 @@ public class EarthquakeCityMap extends PApplet {
 	}
 	
 	
-	// TODO: Add the method:
-	//   private void sortAndPrint(int numToPrint)
+	// Add the method:
 	// and then call that method from setUp
+	private void sortAndPrint(int numToPrint) {
+		EarthquakeMarker[] arrayToSort = new EarthquakeMarker[quakeMarkers.size()];
+		arrayToSort = quakeMarkers.toArray(arrayToSort);
+		Arrays.sort(arrayToSort);	
+		for (int i = 0; i < arrayToSort.length && i < numToPrint; i++) {
+			System.out.println(arrayToSort[i].getTitle());
+		}
+	}
+	
+	
 	
 	/** Event handler that gets called automatically when the 
 	 * mouse moves.
