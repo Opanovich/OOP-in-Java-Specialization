@@ -17,6 +17,7 @@ import de.fhpotsdam.unfolding.providers.MBTilesMapProvider;
 import de.fhpotsdam.unfolding.utils.MapUtils;
 import parsing.ParseFeed;
 import processing.core.PApplet;
+import processing.core.PGraphics;
 
 /** EarthquakeCityMap
  * An application with an interactive map displaying earthquake data.
@@ -36,7 +37,7 @@ public class EarthquakeCityMap extends PApplet {
 	private static final long serialVersionUID = 1L;
 
 	// IF YOU ARE WORKING OFFILINE, change the value of this variable to true
-	private static final boolean offline = false;
+	private static final boolean offline = true;
 	
 	/** This is where to find the local tiles, for working without an Internet connection */
 	public static String mbTilesString = "blankLight-1-3.mbtiles";
@@ -64,6 +65,9 @@ public class EarthquakeCityMap extends PApplet {
 	// NEW IN MODULE 5
 	private CommonMarker lastSelected;
 	private CommonMarker lastClicked;
+	
+	// to overdraw titles over all
+	private static PGraphics titleGraphics;
 	
 	public void setup() {		
 		// (1) Initializing canvas and map tiles
@@ -117,6 +121,7 @@ public class EarthquakeCityMap extends PApplet {
 
 	    // could be used for debugging
 	    printQuakes();
+	    sortAndPrint(10);
 	 		
 	    // (3) Add markers to map
 	    //     NOTE: Country markers are not added to the map.  They are used
@@ -124,21 +129,31 @@ public class EarthquakeCityMap extends PApplet {
 	    map.addMarkers(quakeMarkers);
 	    map.addMarkers(cityMarkers);
 	    
-	    
+	    titleGraphics = createGraphics(650, 600);
 	}  // End setup
 	
 	
 	public void draw() {
-		background(0);
+		
+		background(150);
 		map.draw();
 		addKey();
-		
+		image(titleGraphics, 200, 50);		
 	}
 	
 	
-	// TODO: Add the method:
-	//   private void sortAndPrint(int numToPrint)
+	// Add the method:
 	// and then call that method from setUp
+	private void sortAndPrint(int numToPrint) {
+		EarthquakeMarker[] arrayToSort = new EarthquakeMarker[quakeMarkers.size()];
+		arrayToSort = quakeMarkers.toArray(arrayToSort);
+		Arrays.sort(arrayToSort);	
+		for (int i = 0; i < arrayToSort.length && i < numToPrint; i++) {
+			System.out.println(arrayToSort[i].getTitle());
+		}
+	}
+	
+	
 	
 	/** Event handler that gets called automatically when the 
 	 * mouse moves.
@@ -150,11 +165,17 @@ public class EarthquakeCityMap extends PApplet {
 		if (lastSelected != null) {
 			lastSelected.setSelected(false);
 			lastSelected = null;
-		
 		}
+		
 		selectMarkerIfHover(quakeMarkers);
 		selectMarkerIfHover(cityMarkers);
-		//loop();
+		
+		if (lastSelected == null) {
+			PGraphics titleGraphics = EarthquakeCityMap.getTitleGraphics();
+			titleGraphics.beginDraw();
+			titleGraphics.clear();
+			titleGraphics.endDraw();
+		}
 	}
 	
 	// If there is a marker selected 
@@ -265,6 +286,7 @@ public class EarthquakeCityMap extends PApplet {
 	// helper method to draw key in GUI
 	private void addKey() {	
 		// Remember you can use Processing's graphics methods here
+		pushStyle();
 		fill(255, 250, 240);
 		
 		int xbase = 25;
@@ -322,7 +344,8 @@ public class EarthquakeCityMap extends PApplet {
 		strokeWeight(2);
 		line(centerx-8, centery-8, centerx+8, centery+8);
 		line(centerx-8, centery+8, centerx+8, centery-8);
-		
+		strokeWeight(1);
+		popStyle();
 		
 	}
 
@@ -408,6 +431,11 @@ public class EarthquakeCityMap extends PApplet {
 			return true;
 		}
 		return false;
+	}
+	
+	// getter for title screen
+	public static PGraphics getTitleGraphics() {
+		return titleGraphics;
 	}
 
 }

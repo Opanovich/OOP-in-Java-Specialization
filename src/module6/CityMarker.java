@@ -56,7 +56,9 @@ public class CityMarker extends CommonMarker {
 		String name = getCity() + " " + getCountry() + " ";
 		String pop = "Pop: " + getPopulation() + " Million";
 		
-		pg.pushStyle();
+		pg = EarthquakeCityMap.getTitleGraphics();
+		pg.beginDraw();
+		pg.clear();
 		
 		pg.fill(255, 255, 255);
 		pg.textSize(12);
@@ -67,7 +69,7 @@ public class CityMarker extends CommonMarker {
 		pg.text(name, x+3, y-TRI_SIZE-33);
 		pg.text(pop, x+3, y - TRI_SIZE -18);
 		
-		pg.popStyle();
+		pg.endDraw();
 	}
 	
 	private String getCity()
