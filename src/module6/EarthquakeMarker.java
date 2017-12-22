@@ -3,6 +3,7 @@ package module6;
 import de.fhpotsdam.unfolding.data.PointFeature;
 import processing.core.PConstants;
 import processing.core.PGraphics;
+import processing.core.PApplet;
 
 /** Implements a visual marker for earthquakes on an earthquake map
  * 
@@ -49,10 +50,8 @@ public abstract class EarthquakeMarker extends CommonMarker implements Comparabl
 		super(feature.getLocation());
 		// Add a radius property and then set the properties
 		java.util.HashMap<String, Object> properties = feature.getProperties();
-		float magnitude = Float.parseFloat(properties.get("magnitude").toString());
-		properties.put("radius", 2*magnitude );
 		setProperties(properties);
-		this.radius = 1.75f*getMagnitude();
+		this.radius =  PApplet.map(getMagnitude(), 2, 8, 1, 10);
 	}
 	
 	// Add the method:
@@ -103,7 +102,10 @@ public abstract class EarthquakeMarker extends CommonMarker implements Comparabl
 	public void showTitle(PGraphics pg, float x, float y)
 	{
 		String title = getTitle();
-		pg.pushStyle();
+		
+		pg = EarthquakeCityMap.getTitleGraphics();
+		pg.beginDraw();
+		pg.clear();
 		
 		pg.rectMode(PConstants.CORNER);
 		
@@ -115,9 +117,7 @@ public abstract class EarthquakeMarker extends CommonMarker implements Comparabl
 		pg.fill(0);
 		pg.text(title, x + 3 , y +18);
 		
-		
-		pg.popStyle();
-		
+		pg.endDraw();
 	}
 
 	

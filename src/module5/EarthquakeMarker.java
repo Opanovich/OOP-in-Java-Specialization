@@ -95,7 +95,7 @@ public abstract class EarthquakeMarker extends CommonMarker
 	{
 		pg = EarthquakeCityMap.titlesGraphics;
 		pg.beginDraw();
-		pg.pushStyle();
+		pg.clear();
 		pg.textSize(12);
 		pg.textAlign(PGraphics.LEFT);
 		String information = this.getTitle();
@@ -104,7 +104,6 @@ public abstract class EarthquakeMarker extends CommonMarker
 		pg.rect(x, y - pg.textAscent(), pg.textWidth(information), pg.textAscent() + pg.textDescent());
 		pg.fill(0);
 		pg.text(information, x, y);
-		pg.popStyle();
 		pg.endDraw();
 	}
 
