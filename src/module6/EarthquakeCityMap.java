@@ -83,6 +83,9 @@ public class EarthquakeCityMap extends PApplet {
 		}
 		MapUtils.createDefaultEventDispatcher(this, map);
 		
+		// create frame for title same as map
+	    titleGraphics = createGraphics(650, 600);
+		
 		// FOR TESTING: Set earthquakesURL to be one of the testing files by uncommenting
 		// one of the lines below.  This will work whether you are online or offline
 		//earthquakesURL = "test1.atom";
@@ -129,7 +132,6 @@ public class EarthquakeCityMap extends PApplet {
 	    map.addMarkers(quakeMarkers);
 	    map.addMarkers(cityMarkers);
 	    
-	    titleGraphics = createGraphics(650, 600);
 	}  // End setup
 	
 	
@@ -170,8 +172,8 @@ public class EarthquakeCityMap extends PApplet {
 		selectMarkerIfHover(quakeMarkers);
 		selectMarkerIfHover(cityMarkers);
 		
+		// clear title
 		if (lastSelected == null) {
-			PGraphics titleGraphics = EarthquakeCityMap.getTitleGraphics();
 			titleGraphics.beginDraw();
 			titleGraphics.clear();
 			titleGraphics.endDraw();
