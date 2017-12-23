@@ -14,6 +14,7 @@ import de.fhpotsdam.unfolding.utils.MapUtils;
 import de.fhpotsdam.unfolding.geo.Location;
 import parsing.ParseFeed;
 import processing.core.PApplet;
+import processing.core.PGraphics;
 
 /** An applet that shows airports (and routes)
  * on a world map.  
@@ -23,9 +24,17 @@ import processing.core.PApplet;
  */
 public class AirportMap extends PApplet {
 	
+	private static final long serialVersionUID = 1L;
+	
 	UnfoldingMap map;
 	private List<Marker> airportList;
 	List<Marker> routeList;
+	
+	private CommonMarker lastSelected;
+	private CommonMarker lastClicked;
+	
+	// to overdraw titles over all
+	private static PGraphics titleGraphics;
 	
 	public void setup() {
 		// setting up PAppler
@@ -34,6 +43,9 @@ public class AirportMap extends PApplet {
 		// setting up map and default events
 		map = new UnfoldingMap(this, 50, 50, 750, 550);
 		MapUtils.createDefaultEventDispatcher(this, map);
+		
+		// create frame for title same as map
+	    titleGraphics = createGraphics(750, 550);
 		
 		// get features from airport data
 		List<PointFeature> features = ParseFeed.parseAirports(this, "airports.dat");
@@ -72,7 +84,7 @@ public class AirportMap extends PApplet {
 			
 			SimpleLinesMarker sl = new SimpleLinesMarker(route.getLocations(), route.getProperties());
 		
-			System.out.println(sl.getProperties());
+			//System.out.println(sl.getProperties());
 			
 			//UNCOMMENT IF YOU WANT TO SEE ALL ROUTES
 			//routeList.add(sl);
@@ -91,7 +103,48 @@ public class AirportMap extends PApplet {
 		background(0);
 		map.draw();
 		
+		// draw frame in the place of map
+		image(titleGraphics, 50, 50);	
 	}
 	
-
+	@Override
+	public void mouseMoved() {
+		// clear the last selection
+		if (lastSelected != null) {
+			lastSelected.setSelected(false);
+			lastSelected = null;
+		}
+		
+		selectMarkerIfHover(airportList);
+		
+		// clear title
+		if (lastSelected == null) {
+			titleGraphics.beginDraw();
+			titleGraphics.clear();
+			titleGraphics.endDraw();
+		}
+	}
+	
+	public static PGraphics getTitleGraphics() {
+		return titleGraphics;
+	}
+	
+	// If there is a marker selected 
+	private void selectMarkerIfHover(List<Marker> markers)
+	{
+		// Abort if there's already a marker selected
+		if (lastSelected != null) {
+			return;
+		}
+		
+		for (Marker m : markers) 
+		{
+			CommonMarker marker = (CommonMarker) m;
+			if (marker.isInside(map,  mouseX, mouseY)) {
+				lastSelected = marker;
+				marker.setSelected(true);
+				return;
+			}
+		}
+	}
 }
