@@ -151,10 +151,14 @@ public class ParseFeed {
 			String[] columns = row.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)");
 			
 			// get location and create feature
-			//System.out.println(columns[6]);
 			float lat = Float.parseFloat(columns[6]);
 			float lon = Float.parseFloat(columns[7]);
 			
+			// get rid of \" in Strings
+			for (int j = 1; j <= 5; j++) {
+				columns[j] = columns[j].substring(1, columns[j].length()-1);
+			}
+
 			Location loc = new Location(lat, lon);
 			PointFeature point = new PointFeature(loc);
 			
