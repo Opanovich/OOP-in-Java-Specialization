@@ -31,7 +31,7 @@ public class AirportMap extends PApplet {
 	List<Marker> routeList;
 	
 	private CommonMarker lastSelected;
-	private CommonMarker lastClicked;
+	private AirportMarker lastClicked;
 	
 	// to overdraw titles over all
 	private static PGraphics titleGraphics;
@@ -58,12 +58,15 @@ public class AirportMap extends PApplet {
 		for(PointFeature feature : features) {
 			AirportMarker m = new AirportMarker(feature);
 	
+			// TODO: change airport marker's radius 
+			// depends on amount of routes through that airport
 			m.setRadius(5);
+			m.setId(feature.getId());
 			airportList.add(m);
 			
 			// put airport in hashmap with OpenFlights unique id for key
 			airports.put(Integer.parseInt(feature.getId()), feature.getLocation());
-		
+
 		}
 		
 		
@@ -82,19 +85,12 @@ public class AirportMap extends PApplet {
 				route.addLocation(airports.get(dest));
 			}
 			
-			SimpleLinesMarker sl = new SimpleLinesMarker(route.getLocations(), route.getProperties());
-		
-			//System.out.println(sl.getProperties());
-			
-			//UNCOMMENT IF YOU WANT TO SEE ALL ROUTES
-			//routeList.add(sl);
+			SimpleLinesMarker sl = new SimpleLinesMarker(route.getLocations(), route.getProperties());			
+			routeList.add(sl);
 		}
 		
-		
-		
-		//UNCOMMENT IF YOU WANT TO SEE ALL ROUTES
-		//map.addMarkers(routeList);
-		
+		map.addMarkers(routeList);
+		hideRoutes();
 		map.addMarkers(airportList);
 		
 	}
@@ -109,6 +105,7 @@ public class AirportMap extends PApplet {
 	
 	@Override
 	public void mouseMoved() {
+		
 		// clear the last selection
 		if (lastSelected != null) {
 			lastSelected.setSelected(false);
@@ -125,13 +122,64 @@ public class AirportMap extends PApplet {
 		}
 	}
 	
+	@Override
+	public void mouseClicked() {
+		
+		if (lastClicked != null) {
+			hideRoutes();
+			lastClicked = null;
+		}
+		checkAirportForClick();
+		if (lastClicked != null) {
+			showRoutes();
+		}
+	}
+	
+	// for lastclicked marker show all routes that it has
+	private void showRoutes() {
+		
+		for (Marker route : routeList) {
+			int last = Integer.parseInt((String) lastClicked.getId());
+			int destination = Integer.parseInt((String) route.getProperty("destination"));
+			int source = Integer.parseInt((String) route.getProperty("source"));
+			if (last == destination || last == source) {
+				route.setHidden(false);
+				System.out.println(route.getProperty("destination") + " " 
+						+ route.getProperty("source") + " ID="
+						+ lastClicked.getId() + " " + lastClicked.getCity());
+			}
+		}
+	}
+	
+	// Helper method that will check if an airport marker was clicked on
+	// and respond appropriately
+	private void checkAirportForClick() {
+		
+		// Loop over the airport markers to see if one of them is selected
+		for (Marker m : airportList) {
+			AirportMarker marker = (AirportMarker) m;
+			if (marker.isInside(map, mouseX, mouseY)) {
+				lastClicked = marker;
+			}
+		}
+	}
+	
+	// loop over and hide all markers
+	private void hideRoutes() {
+		
+		for(Marker marker : routeList) {
+			marker.setHidden(true);
+		}
+	}
+	
 	public static PGraphics getTitleGraphics() {
+		
 		return titleGraphics;
 	}
 	
 	// If there is a marker selected 
-	private void selectMarkerIfHover(List<Marker> markers)
-	{
+	private void selectMarkerIfHover(List<Marker> markers) {
+		
 		// Abort if there's already a marker selected
 		if (lastSelected != null) {
 			return;
@@ -147,4 +195,5 @@ public class AirportMap extends PApplet {
 			}
 		}
 	}
+	
 }
